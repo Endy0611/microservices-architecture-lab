@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: service-a
+  config:
+    import: "optional:configserver:http://localhost:8888"
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.lab.servicea: DEBUG

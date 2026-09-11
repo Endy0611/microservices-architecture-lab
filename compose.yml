@@ -1,0 +1,70 @@
+version: "3.8"
+
+# OPTIONAL / ADVANCED: run the whole stack in containers.
+# You must build the jars first: ./gradlew :discovery-server:bootJar :config-server:bootJar
+#                                          :api-gateway:bootJar :service-a:bootJar :service-b:bootJar
+# For plain local testing, just run each module with `./gradlew :<module>:bootRun`
+# in the order described in README.md — that's the simplest path.
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.4
+    container_name: keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/lab-realm-realm.json:ro
+
+  discovery-server:
+    build: ./discovery-server
+    ports:
+      - "8761:8761"
+
+  config-server:
+    build: ./config-server
+    ports:
+      - "8888:8888"
+
+  service-b:
+    build: ./service-b
+    depends_on:
+      - discovery-server
+      - config-server
+      - keycloak
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/lab-realm
+    ports:
+      - "8082:8082"
+
+  service-a:
+    build: ./service-a
+    depends_on:
+      - discovery-server
+      - config-server
+      - service-b
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/lab-realm
+    ports:
+      - "8081:8081"
+
+  api-gateway:
+    build: ./api-gateway
+    depends_on:
+      - discovery-server
+      - config-server
+      - service-a
+      - service-b
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/lab-realm
+    ports:
+      - "9090:9090"

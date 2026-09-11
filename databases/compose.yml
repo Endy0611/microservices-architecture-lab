@@ -1,0 +1,44 @@
+version: "3.8"
+
+# Database-per-service: Service A and Service B each get their OWN Postgres
+# instance/database/credentials — neither can see or touch the other's data,
+# and neither shares a database with Keycloak (see keycloak/docker-compose.yml).
+
+services:
+  postgres-a:
+    image: postgres:16-alpine
+    container_name: postgres-a
+    environment:
+      POSTGRES_DB: service_a_db
+      POSTGRES_USER: service_a
+      POSTGRES_PASSWORD: service_a_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-a-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U service_a"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-b:
+    image: postgres:16-alpine
+    container_name: postgres-b
+    environment:
+      POSTGRES_DB: service_b_db
+      POSTGRES_USER: service_b
+      POSTGRES_PASSWORD: service_b_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-b-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U service_b"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-a-data:
+  postgres-b-data:
