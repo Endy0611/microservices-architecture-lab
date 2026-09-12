@@ -1,9 +1,14 @@
 spring:
   application:
     name: service-b
+  profiles:
+    active: dev
   config:
     import: "optional:configserver:http://localhost:8888"
-
+  cloud:
+    config:
+      request-connect-timeout: 10000
+      request-read-timeout: 10000
 logging:
   level:
     org.springframework.security: INFO
