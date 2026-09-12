@@ -3,7 +3,10 @@ server:
 spring:
   application:
     name: eureka-server
-
+  cloud:
+    config:
+      request-connect-timeout: 10000
+      request-read-timeout: 10000
 eureka:
   instance:
     hostname: localhost

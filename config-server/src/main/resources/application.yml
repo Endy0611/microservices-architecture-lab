@@ -4,20 +4,24 @@ server:
 spring:
   application:
     name: config-server
-  profiles:
-    active: dev
   cloud:
     config:
       server:
         git:
           uri: https://github.com/Endy0611/Config_Server_PF.git
-          default-label: main
           username: ${GIT_USERNAME}
           password: ${GIT_TOKEN}
+          default-label: main
           clone-on-start: true
+          timeout: 5          # fail fast after 5s instead of hanging forever
+          refresh-rate: 99999   # only re-fetch from GitHub every 60s, serve local clone otherwise
 
 management:
   endpoints:
     web:
       exposure:
         include: health, info
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.eclipse.jgit: DEBUG

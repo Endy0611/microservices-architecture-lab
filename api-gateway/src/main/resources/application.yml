@@ -1,5 +1,24 @@
+server:
+  port: 9090
 spring:
   application:
     name: api-gateway
+  profiles:
+    active: dev
   config:
-    import: "optional:configserver:http://localhost:8888"
+    import: "optional:configserver:http://127.0.0.1:8888"
+  cloud:
+    config:
+      request-connect-timeout: 10000
+      request-read-timeout: 10000
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh" # You can also use "*" to expose all actuator endpoints
+logging:
+  level:
+    org.springframework.cloud.config: TRACE
+    org.springframework.web.client: TRACE
+    org.springframework.http.client: TRACE
+    org.apache.http: DEBUG

@@ -1,6 +1,5 @@
 package com.endy.servicea.controller;
 
-
 import com.endy.servicea.client.ServiceBClient;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
